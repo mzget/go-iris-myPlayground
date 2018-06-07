@@ -3,25 +3,14 @@ package main
 import (
 	"github.com/kataras/iris"
 
+	"context"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
-
-	"context"
 	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
+	"gowork/app"
+	"gowork/routes"
 	"log"
 )
-
-const CARTOON string = "test-webtoons"
-const PROGRAMS string = "programs"
-
-type Name struct {
-	th string
-	en string
-}
-type PROGRAM struct {
-	name Name
-}
 
 func main() {
 	app := iris.New()
@@ -39,11 +28,8 @@ func main() {
 	// }
 	// defer session.Close()
 	// session.SetMode(mgo.Monotonic, true)
-	client, err := mongo.Connect(context.Background(), "mongodb://mzget:mzget1234@chitchats.ga:27017", nil)
-	if err != nil {
-		log.Fatal(err)
-		panic(err)
-	}
+
+	client := database.Connect()
 	defer client.Disconnect(context.Background())
 
 	// registers a custom handler for 404 not found http (error) status code,
@@ -61,7 +47,7 @@ func main() {
 	// Resource: http://localhost:8080/ping
 	app.Get("/ping", func(ctx iris.Context) {
 		// Database name and collection name
-		coll := client.Database(CARTOON).Collection(PROGRAMS)
+		coll := client.Database(database.CARTOON).Collection(database.PROGRAMS)
 		cursor, err := coll.Find(context.Background(), bson.NewDocument())
 		if err != nil {
 			log.Fatal(err)
@@ -77,6 +63,7 @@ func main() {
 			ctx.WriteString(elem.ToExtJSON(true))
 		}
 	})
+	app.Get("/seasons", seasons.Seasons)
 
 	// Method:   GET
 	// Resource: http://localhost:8080/hello
