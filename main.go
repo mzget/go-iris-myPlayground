@@ -39,6 +39,7 @@ func main() {
 		// If the signing method is not constant the ValidationKeyGetter callback can be used to implement additional checks
 		// Important to avoid security issues described here: https://auth0.com/blog/2015/03/31/critical-vulnerabilities-in-json-web-token-libraries/
 		SigningMethod: jwt.SigningMethodHS256,
+		Expiration:    true,
 	})
 
 	apiRoutes := app.Party("/api")
@@ -61,19 +62,13 @@ func main() {
 	client := database.Connect()
 	defer client.Disconnect(context.Background())
 
-	// registers a custom handler for 404 not found http (error) status code,
-	// fires when route not found or manually by ctx.StatusCode(iris.StatusNotFound).
-	app.OnErrorCode(iris.StatusNotFound, notFoundHandler)
-
 	// Method:   GET
 	// Resource: http://localhost:8080
 	apiRoutes.Get("/", func(ctx iris.Context) {
 		// ctx.HTML("<h1>Welcome</h1>")
 
 		user := ctx.Values().Get("jwt").(*jwt.Token)
-
-		ctx.Writef("This is an authenticated request\n")
-		ctx.Writef("Claim content:\n")
+		log.Println(user.Claims)
 		ctx.JSON(user)
 	})
 
@@ -109,9 +104,9 @@ func main() {
 		ctx.JSON(iris.Map{"message": "Hello Iris!"})
 	})
 
-	// http://localhost:8080
-	// http://localhost:8080/ping
-	// http://localhost:8080/hello
+	// registers a custom handler for 404 not found http (error) status code,
+	// fires when route not found or manually by ctx.StatusCode(iris.StatusNotFound).
+	app.OnErrorCode(iris.StatusNotFound, notFoundHandler)
 	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
 }
 
