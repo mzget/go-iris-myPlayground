@@ -1,17 +1,23 @@
 package main
 
 import (
-	"github.com/kataras/iris"
-
 	"context"
+	"github.com/betacraft/yaag/irisyaag"
+	"github.com/betacraft/yaag/yaag"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/kataras/iris"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"gowork/app/data-access"
 	"gowork/app/security"
+	"gowork/app/utils"
 	"gowork/routes"
 	"log"
+	"os"
+	"path"
+	"path/filepath"
+	// "strings"
 )
 
 func main() {
@@ -22,6 +28,22 @@ func main() {
 	// and log the requests to the terminal.
 	app.Use(recover.New())
 	app.Use(logger.New())
+
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	configuration := utils.GetConfig(path.Join(dir, "conf.json"))
+	log.Println("configuration: ", configuration)
+	if configuration.Env == "Staging" {
+		yaag.Init(&yaag.Config{ // <- IMPORTANT, init the middleware.
+			On:       true,
+			DocTitle: "Iris",
+			DocPath:  "apidoc.html",
+			BaseUrls: map[string]string{"Production": "", "Staging": ""},
+		})
+		app.Use(irisyaag.New()) // <- IMPORTANT, register the middleware.
+	}
 
 	// Database connection
 	// session, err := mgo.Dial("mzget:mzget1234@chitchats.ga:27017")
@@ -107,7 +129,10 @@ func main() {
 	// registers a custom handler for 404 not found http (error) status code,
 	// fires when route not found or manually by ctx.StatusCode(iris.StatusNotFound).
 	app.OnErrorCode(iris.StatusNotFound, notFoundHandler)
-	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
+	// var sb strings.Builder
+	// sb.WriteString(":")
+	// sb.WriteString(configuration.Port)
+	app.Run(iris.Addr(":"+configuration.Port), iris.WithoutServerError(iris.ErrServerClosed))
 }
 
 func notFoundHandler(ctx iris.Context) {
