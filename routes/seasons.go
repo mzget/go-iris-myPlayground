@@ -1,4 +1,4 @@
-package seasons
+package routes
 
 import (
 	"github.com/kataras/iris"

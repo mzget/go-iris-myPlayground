@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/kataras/iris"
-	"time"
 
 	"context"
 	"github.com/dgrijalva/jwt-go"
@@ -14,15 +13,6 @@ import (
 	"gowork/routes"
 	"log"
 )
-
-const mySigningKey string = "MySecret1234"
-
-type MyCustomClaims struct {
-	username string
-	password string
-	_id      string
-	jwt.StandardClaims
-}
 
 func main() {
 	app := iris.New()
@@ -43,7 +33,7 @@ func main() {
 
 	jwtHandler := jwtmiddleware.New(jwtmiddleware.Config{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-			return []byte(mySigningKey), nil
+			return []byte(routes.MySigningKey), nil
 		},
 		// When set, the middleware verifies that tokens are signed with the specific signing algorithm
 		// If the signing method is not constant the ValidationKeyGetter callback can be used to implement additional checks
@@ -59,7 +49,7 @@ func main() {
 			ctx.JSON(iris.Map{"message": tokenError.Error()})
 			return
 		}
-		parseError := jwtHandler.ParseToken(ctx, token, &MyCustomClaims{})
+		parseError := jwtHandler.ParseToken(ctx, token, &routes.MyCustomClaims{})
 		if parseError != nil {
 			ctx.JSON(iris.Map{"message": parseError.Error()})
 			return
@@ -88,28 +78,7 @@ func main() {
 	})
 
 	authRoutes := app.Party("/auth")
-	authRoutes.Post("/login", func(ctx iris.Context) {
-		username, password := ctx.PostValue("username"), ctx.PostValue("password")
-
-		// Create the Claims
-		expireToken := time.Now().Add(time.Hour * 24).Unix()
-		claims := MyCustomClaims{
-			username,
-			password,
-			"2",
-			jwt.StandardClaims{
-				ExpiresAt: expireToken,
-				Issuer:    "nattapon.r@live.com",
-				IssuedAt:  time.Now().Unix(),
-			},
-		}
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		ss, err := token.SignedString([]byte(mySigningKey))
-		if err != nil {
-			log.Panic(err)
-		}
-		ctx.JSON(iris.Map{"data": ss})
-	})
+	authRoutes.Post("/login", routes.Login)
 
 	// same as app.Handle("GET", "/ping", [...])
 	// Method:   GET
@@ -132,7 +101,7 @@ func main() {
 			ctx.WriteString(elem.ToExtJSON(true))
 		}
 	})
-	app.Get("/seasons", seasons.Seasons)
+	app.Get("/seasons", routes.Seasons)
 
 	// Method:   GET
 	// Resource: http://localhost:8080/hello
