@@ -180,6 +180,19 @@ func (m *Middleware) CheckToken(ctx context.Context, token string) error {
 	return nil
 }
 
+// ValidationToken do for getToken from request object and check valid value.
+func (m *Middleware) ValidationToken(ctx context.Context) (string, error) {
+	token, tokenError := m.GetToken(ctx)
+	if tokenError != nil {
+		return "", fmt.Errorf(tokenError.Error())
+	}
+	if err := m.CheckToken(ctx, token); err != nil {
+		return "", fmt.Errorf(err.Error())
+	}
+
+	return token, nil
+}
+
 // CheckJWT the main functionality, checks for token
 func (m *Middleware) CheckJWT(ctx context.Context) error {
 	if !m.Config.EnableAuthOnOptions {
@@ -188,25 +201,33 @@ func (m *Middleware) CheckJWT(ctx context.Context) error {
 		}
 	}
 
-	token, err := m.GetToken(ctx)
+	token, tokenError := m.GetToken(ctx)
+	if tokenError != nil {
+		fmt.Errorf(tokenError.Error())
+	}
 
 	// Now parse the token
 	parsedToken, jwterr := jwt.Parse(token, m.Config.ValidationKeyGetter)
 
-	// parsedToken, jwterr = jwt.ParseWithClaims(token, claim, m.Config.ValidationKeyGetter)
 	if parsedToken.Valid {
 		fmt.Println("You look nice today")
-	} else if ve, ok := err.(*jwt.ValidationError); ok {
+	} else if ve, ok := jwterr.(*jwt.ValidationError); ok {
 		if ve.Errors&jwt.ValidationErrorMalformed != 0 {
 			fmt.Println("That's not even a token")
 		} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
 			// Token is either expired or not active yet
 			fmt.Println("Timing is everything")
 		} else {
-			fmt.Println("Couldn't handle this token:", err)
+			fmt.Println("Couldn't handle this token:", jwterr)
 		}
 	} else {
-		fmt.Println("Couldn't handle this token:", err)
+		fmt.Println("Couldn't handle this token:", jwterr)
+	}
+	// Check if the parsed token is valid...
+	if !parsedToken.Valid {
+		m.logf("Token is invalid")
+		m.Config.ErrorHandler(ctx, "The token isn't valid")
+		return fmt.Errorf("Token is invalid")
 	}
 
 	// Check if there was an error in parsing...
@@ -225,11 +246,69 @@ func (m *Middleware) CheckJWT(ctx context.Context) error {
 		return fmt.Errorf("Error validating token algorithm: %s", message)
 	}
 
+	if m.Config.Expiration {
+		if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok {
+			if expired := claims.VerifyExpiresAt(time.Now().Unix(), true); !expired {
+				return fmt.Errorf("Token is expired")
+			}
+		}
+	}
+
+	m.logf("JWT: %v", parsedToken)
+
+	// If we get here, everything worked and we can set the
+	// user property in context.
+	ctx.Values().Set(m.Config.ContextKey, parsedToken)
+
+	return nil
+}
+
+// CheckJWT the main functionality, checks for token
+func (m *Middleware) ParseToken(ctx context.Context, token string, claim jwt.Claims) error {
+	if !m.Config.EnableAuthOnOptions {
+		if ctx.Method() == iris.MethodOptions {
+			return nil
+		}
+	}
+
+	// Now parse the token
+	parsedToken, jwterr := jwt.ParseWithClaims(token, claim, m.Config.ValidationKeyGetter)
+
+	if parsedToken.Valid {
+		log.Print("You look nice today")
+	} else if ve, ok := jwterr.(*jwt.ValidationError); ok {
+		if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+			fmt.Println("That's not even a token")
+		} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+			// Token is either expired or not active yet
+			fmt.Println("Timing is everything", ve.Error())
+		} else {
+			fmt.Println("Couldn't handle this token:", jwterr)
+		}
+	} else {
+		fmt.Println("Couldn't handle this token:", jwterr)
+	}
 	// Check if the parsed token is valid...
 	if !parsedToken.Valid {
 		m.logf("Token is invalid")
 		m.Config.ErrorHandler(ctx, "The token isn't valid")
 		return fmt.Errorf("Token is invalid")
+	}
+
+	// Check if there was an error in parsing...
+	if jwterr != nil {
+		m.logf("Error parsing token: %v", jwterr)
+		m.Config.ErrorHandler(ctx, jwterr.Error())
+		return fmt.Errorf("Error parsing token: %v", jwterr)
+	}
+
+	if m.Config.SigningMethod != nil && m.Config.SigningMethod.Alg() != parsedToken.Header["alg"] {
+		message := fmt.Sprintf("Expected %s signing method but token specified %s",
+			m.Config.SigningMethod.Alg(),
+			parsedToken.Header["alg"])
+		m.logf("Error validating token algorithm: %s", message)
+		m.Config.ErrorHandler(ctx, errors.New(message).Error())
+		return fmt.Errorf("Error validating token algorithm: %s", message)
 	}
 
 	if m.Config.Expiration {

@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"context"
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
@@ -54,33 +53,19 @@ func main() {
 
 	apiRoutes := app.Party("/api")
 	apiRoutes.Use(func(ctx iris.Context) {
-		token, tokenError := jwtHandler.GetToken(ctx)
+		token, tokenError := jwtHandler.ValidationToken(ctx)
 		if tokenError != nil {
-			fmt.Errorf(tokenError.Error())
+			log.Print(tokenError.Error())
+			ctx.JSON(iris.Map{"message": tokenError.Error()})
+			return
 		}
-		if err := jwtHandler.CheckToken(ctx, token); err != nil {
-			fmt.Errorf(err.Error())
+		parseError := jwtHandler.ParseToken(ctx, token, &MyCustomClaims{})
+		if parseError != nil {
+			ctx.JSON(iris.Map{"message": parseError.Error()})
+			return
 		}
 
-		parsedToken, jwterr := jwt.ParseWithClaims(token, &MyCustomClaims{}, jwtHandler.Config.ValidationKeyGetter)
-		if parsedToken.Valid {
-			fmt.Println("You look nice today")
-			// If everything ok then call next.
-			ctx.Next()
-		} else if ve, ok := jwterr.(*jwt.ValidationError); ok {
-			fmt.Println(ve.Error(), ok)
-
-			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				fmt.Println("That's not even a token")
-			} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
-				// Token is either expired or not active yet
-				fmt.Println("Timing is everything", ve.Error())
-			} else {
-				fmt.Println("Couldn't handle this token:", jwterr)
-			}
-		} else {
-			fmt.Println("Couldn't handle this token:", jwterr)
-		}
+		ctx.Next()
 	})
 
 	client := database.Connect()
@@ -107,10 +92,6 @@ func main() {
 		username, password := ctx.PostValue("username"), ctx.PostValue("password")
 
 		// Create the Claims
-		// claims := jwt.MapClaims{
-		// 	"username": username,
-		// 	"password": password,
-		// }
 		expireToken := time.Now().Add(time.Hour * 24).Unix()
 		claims := MyCustomClaims{
 			username,
