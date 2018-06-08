@@ -4,6 +4,8 @@ import (
 	"github.com/kataras/iris"
 
 	"context"
+	"github.com/dgrijalva/jwt-go"
+	jwtmiddleware "github.com/iris-contrib/middleware/jwt"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -11,6 +13,15 @@ import (
 	"gowork/routes"
 	"log"
 )
+
+const mySigningKey string = "MySecret1234"
+
+type MyCustomClaims struct {
+	username string
+	password string
+	_id      string
+	jwt.StandardClaims
+}
 
 func main() {
 	app := iris.New()
@@ -29,6 +40,20 @@ func main() {
 	// defer session.Close()
 	// session.SetMode(mgo.Monotonic, true)
 
+	jwtHandler := jwtmiddleware.New(jwtmiddleware.Config{
+		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+			return []byte(mySigningKey), nil
+		},
+		// When set, the middleware verifies that tokens are signed with the specific signing algorithm
+		// If the signing method is not constant the ValidationKeyGetter callback can be used to implement additional checks
+		// Important to avoid security issues described here: https://auth0.com/blog/2015/03/31/critical-vulnerabilities-in-json-web-token-libraries/
+		SigningMethod: jwt.SigningMethodHS256,
+		Expiration:    true,
+	})
+
+	apiRoutes := app.Party("/api")
+	apiRoutes.Use(jwtHandler.Serve)
+
 	client := database.Connect()
 	defer client.Disconnect(context.Background())
 
@@ -38,8 +63,40 @@ func main() {
 
 	// Method:   GET
 	// Resource: http://localhost:8080
-	app.Handle("GET", "/", func(ctx iris.Context) {
-		ctx.HTML("<h1>Welcome</h1>")
+	apiRoutes.Get("/", func(ctx iris.Context) {
+		// ctx.HTML("<h1>Welcome</h1>")
+
+		user := ctx.Values().Get("jwt").(*jwt.Token)
+
+		ctx.Writef("This is an authenticated request\n")
+		ctx.Writef("Claim content:\n")
+		ctx.JSON(user)
+	})
+
+	authRoutes := app.Party("/auth")
+	authRoutes.Post("/login", func(ctx iris.Context) {
+		username, password := ctx.PostValue("username"), ctx.PostValue("password")
+
+		// Create the Claims
+		// claims := jwt.MapClaims{
+		// 	"username": username,
+		// 	"password": password,
+		// }
+		claims := MyCustomClaims{
+			username,
+			password,
+			"1",
+			jwt.StandardClaims{
+				ExpiresAt: 60000,
+				Issuer:    "nattapon.r@live.com",
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		ss, err := token.SignedString([]byte(mySigningKey))
+		if err != nil {
+			log.Panic(err)
+		}
+		ctx.JSON(iris.Map{"data": ss})
 	})
 
 	// same as app.Handle("GET", "/ping", [...])

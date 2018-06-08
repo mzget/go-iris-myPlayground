@@ -9,12 +9,18 @@ import (
 	"log"
 )
 
+type Season struct {
+	no        int
+	name      string
+	programId string
+}
+
 // Query all Seasons.
 func Seasons(ctx iris.Context) {
 	client := database.Client
 
 	coll := client.Database(database.CARTOON).Collection(database.SEASONS)
-	cursor, err := coll.Find(context.Background(), bson.NewDocument())
+	cursor, err := coll.Find(context.Background(), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,8 +33,22 @@ func Seasons(ctx iris.Context) {
 			log.Fatal("Err", err)
 		}
 
+		/*
+			bytes, err := elem.MarshalBSON()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			doc, err := bson.ToExtJSON(false, bytes)
+			if err != nil {
+				log.Fatal(err)
+			}
+			println(doc)
+		*/
+
+		text := elem.ToExtJSON(false)
 		// do something with elem....
-		results = append(results, elem.ToExtJSON(true))
+		results = append(results, text)
 	}
 
 	ctx.JSON(results)
