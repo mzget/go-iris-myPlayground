@@ -2,14 +2,16 @@ package main
 
 import (
 	"github.com/kataras/iris"
+	"time"
 
 	"context"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	jwtmiddleware "github.com/iris-contrib/middleware/jwt"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
 	"github.com/mongodb/mongo-go-driver/bson"
-	"gowork/app"
+	"gowork/app/data-access"
+	"gowork/app/security"
 	"gowork/routes"
 	"log"
 )
@@ -48,11 +50,38 @@ func main() {
 		// If the signing method is not constant the ValidationKeyGetter callback can be used to implement additional checks
 		// Important to avoid security issues described here: https://auth0.com/blog/2015/03/31/critical-vulnerabilities-in-json-web-token-libraries/
 		SigningMethod: jwt.SigningMethodHS256,
-		Expiration:    true,
 	})
 
 	apiRoutes := app.Party("/api")
-	apiRoutes.Use(jwtHandler.Serve)
+	apiRoutes.Use(func(ctx iris.Context) {
+		token, tokenError := jwtHandler.GetToken(ctx)
+		if tokenError != nil {
+			fmt.Errorf(tokenError.Error())
+		}
+		if err := jwtHandler.CheckToken(ctx, token); err != nil {
+			fmt.Errorf(err.Error())
+		}
+
+		parsedToken, jwterr := jwt.ParseWithClaims(token, &MyCustomClaims{}, jwtHandler.Config.ValidationKeyGetter)
+		if parsedToken.Valid {
+			fmt.Println("You look nice today")
+			// If everything ok then call next.
+			ctx.Next()
+		} else if ve, ok := jwterr.(*jwt.ValidationError); ok {
+			fmt.Println(ve.Error(), ok)
+
+			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+				fmt.Println("That's not even a token")
+			} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+				// Token is either expired or not active yet
+				fmt.Println("Timing is everything", ve.Error())
+			} else {
+				fmt.Println("Couldn't handle this token:", jwterr)
+			}
+		} else {
+			fmt.Println("Couldn't handle this token:", jwterr)
+		}
+	})
 
 	client := database.Connect()
 	defer client.Disconnect(context.Background())
@@ -82,13 +111,15 @@ func main() {
 		// 	"username": username,
 		// 	"password": password,
 		// }
+		expireToken := time.Now().Add(time.Hour * 24).Unix()
 		claims := MyCustomClaims{
 			username,
 			password,
-			"1",
+			"2",
 			jwt.StandardClaims{
-				ExpiresAt: 60000,
+				ExpiresAt: expireToken,
 				Issuer:    "nattapon.r@live.com",
+				IssuedAt:  time.Now().Unix(),
 			},
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

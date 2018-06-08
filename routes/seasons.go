@@ -5,7 +5,7 @@ import (
 
 	"context"
 	"github.com/mongodb/mongo-go-driver/bson"
-	"gowork/app"
+	"gowork/app/data-access"
 	"log"
 )
 
