@@ -29,6 +29,10 @@ func main() {
 	app.Use(recover.New())
 	app.Use(logger.New())
 
+	// first parameter is the request path
+	// second is the system directory
+	app.StaticWeb("/static", "./assets")
+
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal(err)
@@ -39,7 +43,7 @@ func main() {
 		yaag.Init(&yaag.Config{ // <- IMPORTANT, init the middleware.
 			On:       true,
 			DocTitle: "Iris",
-			DocPath:  "apidoc.html",
+			DocPath:  "./assets/apidoc.html",
 			BaseUrls: map[string]string{"Production": "", "Staging": ""},
 		})
 		app.Use(irisyaag.New()) // <- IMPORTANT, register the middleware.
