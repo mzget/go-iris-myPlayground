@@ -137,7 +137,7 @@ func FromFirst(extractors ...TokenExtractor) TokenExtractor {
 	}
 }
 
-// extract a token from the request
+// GetToken extract a token from the request
 func (m *Middleware) GetToken(ctx context.Context) (string, error) {
 
 	// Use the specified token extractor to extract a token from the request
@@ -159,7 +159,7 @@ func (m *Middleware) GetToken(ctx context.Context) (string, error) {
 	return token, nil
 }
 
-// CheckToken, checks for token ...
+// CheckToken checks for token.
 func (m *Middleware) CheckToken(ctx context.Context, token string) error {
 	// If the token is empty...
 	if token == "" {
@@ -203,7 +203,7 @@ func (m *Middleware) CheckJWT(ctx context.Context) error {
 
 	token, tokenError := m.GetToken(ctx)
 	if tokenError != nil {
-		fmt.Errorf(tokenError.Error())
+		log.Println(tokenError.Error())
 	}
 
 	// Now parse the token
@@ -263,7 +263,7 @@ func (m *Middleware) CheckJWT(ctx context.Context) error {
 	return nil
 }
 
-// CheckJWT the main functionality, checks for token
+// ParseToken the main functionality, checks for token
 func (m *Middleware) ParseToken(ctx context.Context, token string, claim jwt.Claims) error {
 	if !m.Config.EnableAuthOnOptions {
 		if ctx.Method() == iris.MethodOptions {

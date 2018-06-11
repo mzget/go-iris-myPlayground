@@ -102,6 +102,8 @@
             
                 <li role="presentation"><a href="#1top" role="tab" data-toggle="tab">GET : /api</a></li>
             
+                <li role="presentation"><a href="#2top" role="tab" data-toggle="tab">GET : /hello</a></li>
+            
         <ul>
     </div>
     <div class="col-md-8 tab-content">
@@ -232,6 +234,69 @@
                         try {
                             var jsonStr = spaceJson("{\"Raw\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mjg1MzE3NTgsImlhdCI6MTUyODQ0NTM1OCwiaXNzIjoibmF0dGFwb24uckBsaXZlLmNvbSJ9.Xv1qTlCmbHzKFNgUsjQma42uG5UerO5dkZHEPPfUA0s\",\"Method\":{\"Name\":\"HS256\",\"Hash\":5},\"Header\":{\"alg\":\"HS256\",\"typ\":\"JWT\"},\"Claims\":{\"exp\":1528531758,\"iat\":1528445358,\"iss\":\"nattapon.r@live.com\"},\"Signature\":\"Xv1qTlCmbHzKFNgUsjQma42uG5UerO5dkZHEPPfUA0s\",\"Valid\":true}");
                             document.getElementById('response-body-1-0').innerHTML = syntaxHighlight(jsonStr);
+                        } catch (e) {
+                             
+                        }
+                    }
+                </script>
+                
+                <hr>
+            
+        </div>
+        
+        <div id="2top"  role="tabpanel" class="tab-pane col-md-10">
+            
+                
+                <p> <H4> Request Headers </H4> </p>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                    
+                    <tr>
+                        <td>Upgrade-Insecure-Requests</td>
+                        <td>  1</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>X-Forwarded-For</td>
+                        <td>  </td>
+                    </tr>
+                    
+                </table>
+                
+                
+                
+                
+                <p><h4> Response Code</h4></p>
+                <pre class="prettyprint lang-json">200</pre>
+                
+                <p><h4> Response Headers</h4></p>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                    
+                    <tr>
+                        <td>Content-Type</td>
+                        <td> application/json; charset=UTF-8</td>
+                    </tr>
+                    
+                </table>
+                
+                
+                <p> <H4> Response Body </H4> </p>
+                <pre class="prettyprint" id="response-body-2-0">{&#34;message&#34;:&#34;Hello Iris!&#34;}</pre>
+                <script>
+                     
+                    var responseHeader ={"Content-Type":"application/json; charset=UTF-8"};
+
+                    if (responseHeader["Content-Type"].includes("application/json")){
+                        try {
+                            var jsonStr = spaceJson("{\"message\":\"Hello Iris!\"}");
+                            document.getElementById('response-body-2-0').innerHTML = syntaxHighlight(jsonStr);
                         } catch (e) {
                              
                         }

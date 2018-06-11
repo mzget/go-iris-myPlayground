@@ -45,6 +45,8 @@ func main() {
 		app.Use(irisyaag.New()) // <- IMPORTANT, register the middleware.
 	}
 
+	client := database.Connect()
+	defer client.Disconnect(context.Background())
 	// Database connection
 	// session, err := mgo.Dial("mzget:mzget1234@chitchats.ga:27017")
 	// if nil != err {
@@ -80,9 +82,6 @@ func main() {
 
 		ctx.Next()
 	})
-
-	client := database.Connect()
-	defer client.Disconnect(context.Background())
 
 	// Method:   GET
 	// Resource: http://localhost:8080
