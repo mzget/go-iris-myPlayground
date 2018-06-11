@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
+
 	"github.com/betacraft/yaag/irisyaag"
 	"github.com/betacraft/yaag/yaag"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/iris"
+	"github.com/kataras/iris/core/host"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
 	"github.com/mongodb/mongo-go-driver/bson"
+
 	"gowork/app/data-access"
 	"gowork/app/security"
 	"gowork/app/utils"
@@ -135,9 +138,21 @@ func main() {
 	// var sb strings.Builder
 	// sb.WriteString(":")
 	// sb.WriteString(configuration.Port)
-	app.Run(iris.Addr(":"+configuration.Port), iris.WithoutServerError(iris.ErrServerClosed))
+	app.Run(iris.Addr(":"+configuration.Port, configureHost), iris.WithoutServerError(iris.ErrServerClosed))
 }
 
 func notFoundHandler(ctx iris.Context) {
 	ctx.HTML("Custom route for 404 not found http code, here you can render a view, html, json <b>any valid response</b>.")
+}
+
+func configureHost(su *host.Supervisor) {
+	// here we have full access to the host that will be created
+	// inside the `app.Run` function or `NewHost`.
+	//
+	// we're registering a shutdown "event" callback here:
+	su.RegisterOnShutdown(func() {
+		println("server is closed")
+	})
+	// su.RegisterOnError
+	// su.RegisterOnServe
 }
