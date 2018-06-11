@@ -184,7 +184,7 @@ func (m *Middleware) CheckToken(ctx context.Context, token string) error {
 func (m *Middleware) ValidationToken(ctx context.Context) (string, error) {
 	token, tokenError := m.GetToken(ctx)
 	if tokenError != nil {
-		return "", fmt.Errorf(tokenError.Error())
+		return "", tokenError
 	}
 	if err := m.CheckToken(ctx, token); err != nil {
 		return "", fmt.Errorf(err.Error())
@@ -281,7 +281,8 @@ func (m *Middleware) ParseToken(ctx context.Context, token string, claim jwt.Cla
 			fmt.Println("That's not even a token")
 		} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
 			// Token is either expired or not active yet
-			fmt.Println("Timing is everything", ve.Error())
+			log.Print("Timing is everything, ", ve.Error())
+			return fmt.Errorf(ve.Error())
 		} else {
 			fmt.Println("Couldn't handle this token:", jwterr)
 		}

@@ -12,9 +12,9 @@ const MySigningKey string = "MySecret1234"
 
 // MyCustomClaims for claim jwt payload.
 type MyCustomClaims struct {
-	username string
-	password string
-	_id      string
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	ID       string `json:"id,omitempty"`
 	jwt.StandardClaims
 }
 

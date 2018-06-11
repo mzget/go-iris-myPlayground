@@ -89,9 +89,6 @@ func main() {
 
 		ctx.Next()
 	})
-
-	// Method:   GET
-	// Resource: http://localhost:8080
 	apiRoutes.Get("/", func(ctx iris.Context) {
 		// ctx.HTML("<h1>Welcome</h1>")
 
@@ -99,6 +96,7 @@ func main() {
 		log.Println(user.Claims)
 		ctx.JSON(user)
 	})
+	apiRoutes.Get("/refreshToken", routes.RefreshToken)
 
 	authRoutes := app.Party("/auth")
 	authRoutes.Post("/login", routes.Login)
