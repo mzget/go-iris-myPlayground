@@ -84,6 +84,7 @@ func main() {
 		}
 	})
 	apiRoutes.Get("/refreshToken", auth.RefreshToken)
+	apiRoutes.Get("/user", user.GetUser)
 
 	var authRoutes = app.Party("/auth")
 	authRoutes.Post("/login", user.Login)

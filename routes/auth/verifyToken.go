@@ -12,7 +12,7 @@ import (
 func VerifyToken(ctx iris.Context, jwtHandler *jwtmiddleware.Middleware) error {
 	token, tokenError := jwtHandler.ValidationToken(ctx)
 	if tokenError != nil {
-		utils.ResponseFailure(ctx, iris.StatusNonAuthoritativeInfo, "", tokenError)
+		utils.ResponseFailure(ctx, iris.StatusNonAuthoritativeInfo, "", tokenError.Error())
 		return tokenError
 	}
 	parseError := jwtHandler.ParseToken(ctx, token, &MyCustomClaims{})

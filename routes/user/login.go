@@ -45,7 +45,7 @@ func Login(ctx iris.Context) {
 	claims := auth.MyCustomClaims{
 		user.Email,
 		user.Password,
-		user.ID.String(),
+		user.ID.Hex(),
 		jwt.StandardClaims{
 			ExpiresAt: expireToken,
 			Issuer:    "nattapon.r@live.com",
