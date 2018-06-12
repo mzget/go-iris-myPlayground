@@ -14,7 +14,6 @@ import (
 	"gowork/app/security"
 	"gowork/app/utils"
 	"gowork/routes"
-	"gowork/routes/user"
 	"log"
 	"os"
 	"path"
@@ -84,7 +83,7 @@ func main() {
 
 	var authRoutes = app.Party("/auth")
 	authRoutes.Post("/login", routes.Login)
-	authRoutes.Post("/register", user.Register)
+	authRoutes.Post("/register", routes.Register)
 
 	/* Official mongodb client.
 

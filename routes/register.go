@@ -1,4 +1,4 @@
-package user
+package routes
 
 import (
 	// "encoding/json"
@@ -50,7 +50,7 @@ func Register(ctx iris.Context) {
 	coll := session.DB(config.DbName).C(config.UserCollection)
 	if err := coll.Insert(user); err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.JSON(iris.Map{"message": err})
+		ctx.JSON(err)
 
 		return
 	}
