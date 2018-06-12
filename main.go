@@ -1,16 +1,14 @@
 package main
 
 import (
-	"context"
-
 	"github.com/betacraft/yaag/irisyaag"
 	"github.com/betacraft/yaag/yaag"
 	"github.com/dgrijalva/jwt-go"
+
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/core/host"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
-	"github.com/mongodb/mongo-go-driver/bson"
 
 	"gowork/app/data-access"
 	"gowork/app/security"
@@ -38,7 +36,7 @@ func main() {
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	configuration := utils.GetConfig(path.Join(dir, "conf.json"))
 	log.Println("configuration: ", configuration)
@@ -52,15 +50,9 @@ func main() {
 		app.Use(irisyaag.New()) // <- IMPORTANT, register the middleware.
 	}
 
-	client := database.Connect()
-	defer client.Disconnect(context.Background())
 	// Database connection
-	// session, err := mgo.Dial("mzget:mzget1234@chitchats.ga:27017")
-	// if nil != err {
-	// 	panic(err)
-	// }
-	// defer session.Close()
-	// session.SetMode(mgo.Monotonic, true)
+	session := database.MgoConnect(configuration)
+	defer session.Close()
 
 	jwtHandler := jwtmiddleware.New(jwtmiddleware.Config{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
@@ -73,55 +65,46 @@ func main() {
 		Expiration:    true,
 	})
 
-	apiRoutes := app.Party("/api")
+	var apiRoutes = app.Party("/api")
 	apiRoutes.Use(func(ctx iris.Context) {
-		token, tokenError := jwtHandler.ValidationToken(ctx)
-		if tokenError != nil {
-			log.Print(tokenError.Error())
-			ctx.JSON(iris.Map{"message": tokenError.Error()})
-			return
-		}
-		parseError := jwtHandler.ParseToken(ctx, token, &routes.MyCustomClaims{})
-		if parseError != nil {
-			ctx.JSON(iris.Map{"message": parseError.Error()})
-			return
-		}
-
-		ctx.Next()
+		routes.VerifyToken(ctx, jwtHandler)
 	})
 	apiRoutes.Get("/", func(ctx iris.Context) {
+		log.Print(ctx.GetHeader(utils.ApiVersion))
 		// ctx.HTML("<h1>Welcome</h1>")
-
 		user := ctx.Values().Get("jwt").(*jwt.Token)
 		log.Println(user.Claims)
 		ctx.JSON(user)
 	})
 	apiRoutes.Get("/refreshToken", routes.RefreshToken)
 
-	authRoutes := app.Party("/auth")
+	var authRoutes = app.Party("/auth")
 	authRoutes.Post("/login", routes.Login)
 
-	// same as app.Handle("GET", "/ping", [...])
-	// Method:   GET
-	// Resource: http://localhost:8080/ping
-	app.Get("/ping", func(ctx iris.Context) {
-		// Database name and collection name
-		coll := client.Database(database.CARTOON).Collection(database.PROGRAMS)
-		cursor, err := coll.Find(context.Background(), bson.NewDocument())
-		if err != nil {
-			log.Fatal(err)
-		}
-		for cursor.Next(context.Background()) {
-			elem := bson.NewDocument()
-			if err := cursor.Decode(elem); err != nil {
+	/* Official mongodb client.
+
+		client := database.Connect()
+	 	defer client.Disconnect(context.Background())
+
+		app.Get("/ping", func(ctx iris.Context) {
+			// Database name and collection name
+			coll := client.Database(database.CARTOON).Collection(database.PROGRAMS)
+			cursor, err := coll.Find(context.Background(), bson.NewDocument())
+			if err != nil {
 				log.Fatal(err)
 			}
+			for cursor.Next(context.Background()) {
+				elem := bson.NewDocument()
+				if err := cursor.Decode(elem); err != nil {
+					log.Fatal(err)
+				}
 
-			// do something with elem....
-			log.Fatal("result", elem.ToExtJSON(true))
-			ctx.WriteString(elem.ToExtJSON(true))
-		}
-	})
+				// do something with elem....
+				log.Fatal("result", elem.ToExtJSON(true))
+				ctx.WriteString(elem.ToExtJSON(true))
+			}
+		})
+	*/
 	app.Get("/seasons", routes.Seasons)
 
 	// Method:   GET

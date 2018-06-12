@@ -275,7 +275,6 @@ func (m *Middleware) ParseToken(ctx context.Context, token string, claim jwt.Cla
 	parsedToken, jwterr := jwt.ParseWithClaims(token, claim, m.Config.ValidationKeyGetter)
 
 	if parsedToken.Valid {
-		log.Print("You look nice today")
 	} else if ve, ok := jwterr.(*jwt.ValidationError); ok {
 		if ve.Errors&jwt.ValidationErrorMalformed != 0 {
 			fmt.Println("That's not even a token")

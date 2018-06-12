@@ -9,8 +9,10 @@ import (
 
 // Configuration structure.
 type Configuration struct {
-	Port string
-	Env  string
+	Port  string
+	Env   string
+	DbDev string
+	DbPD  string
 }
 
 // GetConfig for load configuration file json.

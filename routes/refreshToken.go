@@ -16,6 +16,10 @@ func RefreshToken(ctx iris.Context) {
 	bytes, _ := json.Marshal(user.Claims)
 	if err := json.Unmarshal(bytes, &my); err != nil {
 		log.Print(err.Error())
+
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"message": err.Error()})
+		return
 	}
 
 	// Create the Claims
