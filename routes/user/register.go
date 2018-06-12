@@ -49,6 +49,19 @@ func Register(ctx iris.Context) {
 
 	var session = database.GetMgoSession()
 	coll := session.DB(config.DbName).C(config.UserCollection)
+	// Find email already register first.
+	num, notFound := coll.Find(bson.M{"email": user.Email}).Count()
+
+	if notFound != nil {
+		utils.ResponseFailure(ctx, iris.StatusBadRequest, nil, notFound)
+		return
+	}
+
+	if num > 0 {
+		utils.ResponseFailure(ctx, iris.StatusBadRequest, "Email already used.", nil)
+		return
+	}
+
 	if err := coll.Insert(user); err != nil {
 		utils.ResponseFailure(ctx, iris.StatusBadRequest, "", err)
 		return
