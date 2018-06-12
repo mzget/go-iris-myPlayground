@@ -74,14 +74,14 @@ func main() {
 	})
 	var apiRoutes = app.Party("/api")
 	apiRoutes.Use(func(ctx iris.Context) {
-		auth.VerifyToken(ctx, jwtHandler)
-	})
-	apiRoutes.Get("/", func(ctx iris.Context) {
 		log.Print(ctx.GetHeader(utils.ApiVersion))
 
-		user := ctx.Values().Get("jwt").(*jwt.Token)
-		log.Println(user.Claims)
-		ctx.JSON(user)
+		err := auth.VerifyToken(ctx, jwtHandler)
+		if err == nil {
+			user := ctx.Values().Get("jwt").(*jwt.Token)
+			ctx.Values().Set("user", user.Claims)
+			ctx.Next()
+		}
 	})
 	apiRoutes.Get("/refreshToken", auth.RefreshToken)
 
@@ -114,12 +114,6 @@ func main() {
 		})
 	*/
 	app.Get("/seasons", routes.Seasons)
-
-	// Method:   GET
-	// Resource: http://localhost:8080/hello
-	app.Get("/hello", func(ctx iris.Context) {
-		ctx.JSON(iris.Map{"message": "Hello Iris!"})
-	})
 
 	// registers a custom handler for 404 not found http (error) status code,
 	// fires when route not found or manually by ctx.StatusCode(iris.StatusNotFound).

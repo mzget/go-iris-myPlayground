@@ -281,7 +281,7 @@ func (m *Middleware) ParseToken(ctx context.Context, token string, claim jwt.Cla
 		} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
 			// Token is either expired or not active yet
 			log.Print("Timing is everything, ", ve.Error())
-			return fmt.Errorf(ve.Error())
+			return ve
 		} else {
 			fmt.Println("Couldn't handle this token:", jwterr)
 		}
