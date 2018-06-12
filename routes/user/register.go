@@ -1,27 +1,40 @@
 package user
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"github.com/kataras/iris"
-	"log"
-	"time"
+	// "log"
+	// "time"
+	"gowork/app/data-access"
+	"gowork/app/utils"
 )
 
 // User model.
 type User struct {
 	Name     string
-	Username string
 	Password string
+	Email    string
 }
 
 // Register user.
 func Register(ctx iris.Context) {
-	var result = User{}
+	email, password := ctx.PostValue("email"), ctx.PostValue("password")
+	c := ctx.Values().Get("config")
+	config, _ := c.(utils.Configuration)
 
-	// Database name and collection name
-	// car-db is database name car is collation name
-	c := session.DB("car-db").C("car")
-	c.Insert(&Car{"Audi", "Luxury car"})
+	var user = User{
+		Email:    email,
+		Password: password,
+	}
 
-	ctx.JSON(result)
+	var session = database.GetMgoSession()
+	coll := session.DB(config.DbName).C(config.UserCollection)
+	if err := coll.Insert(user); err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"message": err})
+
+		return
+	}
+
+	ctx.JSON(iris.Map{"data": map[string]bool{"success": true}})
 }

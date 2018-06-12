@@ -8,6 +8,8 @@ import (
 	"log"
 )
 
+var mgoSession *mgo.Session
+
 // MgoConnect use for init mongodb connection.
 func MgoConnect(configuration utils.Configuration) *mgo.Session {
 	// Database connection
@@ -23,5 +25,12 @@ func MgoConnect(configuration utils.Configuration) *mgo.Session {
 	}
 	session.SetMode(mgo.Monotonic, true)
 
+	mgoSession = session
+
 	return session
+}
+
+// GetMgoSession use for get session object.
+func GetMgoSession() *mgo.Session {
+	return mgoSession
 }

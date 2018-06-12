@@ -14,6 +14,7 @@ import (
 	"gowork/app/security"
 	"gowork/app/utils"
 	"gowork/routes"
+	"gowork/routes/user"
 	"log"
 	"os"
 	"path"
@@ -39,7 +40,6 @@ func main() {
 		log.Panic(err)
 	}
 	configuration := utils.GetConfig(path.Join(dir, "conf.json"))
-	log.Println("configuration: ", configuration)
 	if configuration.Env == "Staging" {
 		yaag.Init(&yaag.Config{ // <- IMPORTANT, init the middleware.
 			On:       true,
@@ -65,6 +65,10 @@ func main() {
 		Expiration:    true,
 	})
 
+	app.Use(func(ctx iris.Context) {
+		ctx.Values().Set("config", configuration)
+		ctx.Next()
+	})
 	var apiRoutes = app.Party("/api")
 	apiRoutes.Use(func(ctx iris.Context) {
 		routes.VerifyToken(ctx, jwtHandler)
@@ -80,6 +84,7 @@ func main() {
 
 	var authRoutes = app.Party("/auth")
 	authRoutes.Post("/login", routes.Login)
+	authRoutes.Post("/register", user.Register)
 
 	/* Official mongodb client.
 

@@ -106,6 +106,8 @@
             
                 <li role="presentation"><a href="#3top" role="tab" data-toggle="tab">GET : /api/refreshToken</a></li>
             
+                <li role="presentation"><a href="#4top" role="tab" data-toggle="tab">POST : /auth/register</a></li>
+            
         <ul>
     </div>
     <div class="col-md-8 tab-content">
@@ -2199,6 +2201,245 @@
                         try {
                             var jsonStr = spaceJson("{\"data\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImdldCIsInBhc3N3b3JkIjoiMTIzNCIsImlkIjoiMiIsImV4cCI6MTUyODgwNzgyMCwiaWF0IjoxNTI4NzIxNDIwLCJpc3MiOiJuYXR0YXBvbi5yQGxpdmUuY29tIn0.-BjeAhxjcBWXMtkHkhfRzQHvsYnrXYTpkVWjPU5yfks\"}");
                             document.getElementById('response-body-3-22').innerHTML = syntaxHighlight(jsonStr);
+                        } catch (e) {
+                             
+                        }
+                    }
+                </script>
+                
+                <hr>
+            
+        </div>
+        
+        <div id="4top"  role="tabpanel" class="tab-pane col-md-10">
+            
+                
+                <p> <H4> Request Headers </H4> </p>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                    
+                    <tr>
+                        <td>Email</td>
+                        <td>  nattapon.r@live.com</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>Password</td>
+                        <td>  1234</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>Postman-Token</td>
+                        <td>  3ba0cec6-8e73-4410-bc7f-84dcdc7c2fea</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>X-Forwarded-For</td>
+                        <td>  </td>
+                    </tr>
+                    
+                </table>
+                
+                
+                
+                
+                <p><h4> Response Code</h4></p>
+                <pre class="prettyprint lang-json">200</pre>
+                
+                <p><h4> Response Headers</h4></p>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                    
+                    <tr>
+                        <td>Content-Type</td>
+                        <td> application/json; charset=UTF-8</td>
+                    </tr>
+                    
+                </table>
+                
+                
+                <p> <H4> Response Body </H4> </p>
+                <pre class="prettyprint" id="response-body-4-0">{&#34;data&#34;:{&#34;Name&#34;:&#34;&#34;,&#34;Password&#34;:&#34;&#34;,&#34;Email&#34;:&#34;&#34;}}</pre>
+                <script>
+                     
+                    var responseHeader ={"Content-Type":"application/json; charset=UTF-8"};
+
+                    if (responseHeader["Content-Type"].includes("application/json")){
+                        try {
+                            var jsonStr = spaceJson("{\"data\":{\"Name\":\"\",\"Password\":\"\",\"Email\":\"\"}}");
+                            document.getElementById('response-body-4-0').innerHTML = syntaxHighlight(jsonStr);
+                        } catch (e) {
+                             
+                        }
+                    }
+                </script>
+                
+                <hr>
+            
+                
+                <p> <H4> Request Headers </H4> </p>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                    
+                    <tr>
+                        <td>Content-Type</td>
+                        <td> multipart/form-data</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>Postman-Token</td>
+                        <td>  ea006368-955b-4840-9a4d-17b24efbeda3</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>X-Forwarded-For</td>
+                        <td>  </td>
+                    </tr>
+                    
+                </table>
+                
+                
+                <p> <H4> Post Form </H4> </p>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                    
+                    <tr>
+                        <td>email</td>
+                        <td> nattapon.r@live.com</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>password</td>
+                        <td> 1234</td>
+                    </tr>
+                    
+                </table>
+                
+                
+                
+                <p><h4> Response Code</h4></p>
+                <pre class="prettyprint lang-json">200</pre>
+                
+                <p><h4> Response Headers</h4></p>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                    
+                    <tr>
+                        <td>Content-Type</td>
+                        <td> application/json; charset=UTF-8</td>
+                    </tr>
+                    
+                </table>
+                
+                
+                <p> <H4> Response Body </H4> </p>
+                <pre class="prettyprint" id="response-body-4-1">{&#34;data&#34;:{&#34;Name&#34;:&#34;&#34;,&#34;Password&#34;:&#34;1234&#34;,&#34;Email&#34;:&#34;nattapon.r@live.com&#34;}}</pre>
+                <script>
+                     
+                    var responseHeader ={"Content-Type":"application/json; charset=UTF-8"};
+
+                    if (responseHeader["Content-Type"].includes("application/json")){
+                        try {
+                            var jsonStr = spaceJson("{\"data\":{\"Name\":\"\",\"Password\":\"1234\",\"Email\":\"nattapon.r@live.com\"}}");
+                            document.getElementById('response-body-4-1').innerHTML = syntaxHighlight(jsonStr);
+                        } catch (e) {
+                             
+                        }
+                    }
+                </script>
+                
+                <hr>
+            
+                
+                <p> <H4> Request Headers </H4> </p>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                    
+                    <tr>
+                        <td>Content-Type</td>
+                        <td> multipart/form-data</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>Postman-Token</td>
+                        <td>  d3c9f50f-fab2-46ae-8cac-9f5bac80d9a5</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>X-Forwarded-For</td>
+                        <td>  </td>
+                    </tr>
+                    
+                </table>
+                
+                
+                <p> <H4> Post Form </H4> </p>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                    
+                    <tr>
+                        <td>email</td>
+                        <td> nattapon.r@live.com</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>password</td>
+                        <td> 1234</td>
+                    </tr>
+                    
+                </table>
+                
+                
+                
+                <p><h4> Response Code</h4></p>
+                <pre class="prettyprint lang-json">200</pre>
+                
+                <p><h4> Response Headers</h4></p>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                    
+                    <tr>
+                        <td>Content-Type</td>
+                        <td> application/json; charset=UTF-8</td>
+                    </tr>
+                    
+                </table>
+                
+                
+                <p> <H4> Response Body </H4> </p>
+                <pre class="prettyprint" id="response-body-4-2">{&#34;data&#34;:{&#34;success&#34;:true}}</pre>
+                <script>
+                     
+                    var responseHeader ={"Content-Type":"application/json; charset=UTF-8"};
+
+                    if (responseHeader["Content-Type"].includes("application/json")){
+                        try {
+                            var jsonStr = spaceJson("{\"data\":{\"success\":true}}");
+                            document.getElementById('response-body-4-2').innerHTML = syntaxHighlight(jsonStr);
                         } catch (e) {
                              
                         }
