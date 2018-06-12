@@ -9,27 +9,8 @@ import (
 	// "time"
 	"gowork/app/data-access"
 	"gowork/app/utils"
-
-	"github.com/go-ozzo/ozzo-validation"
-	"github.com/go-ozzo/ozzo-validation/is"
+	"gowork/models"
 )
-
-// User model.
-type User struct {
-	ID       bson.ObjectId `bson:"_id,omitempty"`
-	Name     string
-	Password string
-	Email    string
-}
-
-func (a User) Validate() error {
-	return validation.ValidateStruct(&a,
-		// Street cannot be empty, and the length must between 5 and 50
-		validation.Field(&a.Email, validation.Required, is.Email),
-		// City cannot be empty, and the length must between 5 and 50
-		validation.Field(&a.Password, validation.Required, validation.Length(8, 32)),
-	)
-}
 
 // Register user.
 func Register(ctx iris.Context) {
@@ -37,7 +18,7 @@ func Register(ctx iris.Context) {
 	c := ctx.Values().Get("config")
 	config, _ := c.(utils.Configuration)
 
-	var user = User{
+	var user = models.User{
 		Email:    email,
 		Password: password,
 	}

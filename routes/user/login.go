@@ -11,6 +11,8 @@ import (
 
 	"gowork/routes/auth"
 
+	"gowork/models"
+
 	"log"
 	"time"
 )
@@ -18,7 +20,7 @@ import (
 // Login with username, password ...
 func Login(ctx iris.Context) {
 	email, password := ctx.PostValue("email"), ctx.PostValue("password")
-	user := User{
+	user := models.User{
 		Email:    email,
 		Password: password,
 	}
