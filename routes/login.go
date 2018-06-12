@@ -3,6 +3,12 @@ package routes
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/iris"
+
+	"github.com/globalsign/mgo/bson"
+
+	"gowork/app/data-access"
+	"gowork/app/utils"
+
 	"log"
 	"time"
 )
@@ -20,14 +26,33 @@ type MyCustomClaims struct {
 
 // Login with username, password ...
 func Login(ctx iris.Context) {
-	username, password := ctx.PostValue("username"), ctx.PostValue("password")
+	email, password := ctx.PostValue("email"), ctx.PostValue("password")
+	user := User{
+		Email:    email,
+		Password: password,
+	}
+	err := user.Validate()
+	if err != nil {
+		utils.ResponseFailure(ctx, iris.StatusBadRequest, nil, err)
+		return
+	}
+
+	c := ctx.Values().Get("config")
+	config, _ := c.(utils.Configuration)
+
+	session := database.GetMgoSession()
+	coll := session.DB(config.DbName).C(config.UserCollection)
+	if err := coll.Find(bson.M{"email": email, "password": password}).One(&user); err != nil {
+		utils.ResponseFailure(ctx, iris.StatusBadRequest, "NoContent", err)
+		return
+	}
 
 	// Create the Claims
 	expireToken := time.Now().Add(time.Hour * 24).Unix()
 	claims := MyCustomClaims{
-		username,
-		password,
-		"2",
+		user.Email,
+		user.Password,
+		user.ID.String(),
 		jwt.StandardClaims{
 			ExpiresAt: expireToken,
 			Issuer:    "nattapon.r@live.com",
@@ -39,5 +64,6 @@ func Login(ctx iris.Context) {
 	if err != nil {
 		log.Panic(err)
 	}
-	ctx.JSON(iris.Map{"data": ss})
+
+	utils.ResponseSuccess(ctx, ss)
 }

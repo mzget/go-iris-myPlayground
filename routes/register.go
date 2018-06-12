@@ -3,6 +3,8 @@ package routes
 import (
 	// "encoding/json"
 	"github.com/kataras/iris"
+
+	"github.com/globalsign/mgo/bson"
 	// "log"
 	// "time"
 	"gowork/app/data-access"
@@ -14,6 +16,7 @@ import (
 
 // User model.
 type User struct {
+	ID       bson.ObjectId `bson:"_id,omitempty"`
 	Name     string
 	Password string
 	Email    string
