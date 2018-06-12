@@ -13,7 +13,11 @@ import (
 	"gowork/app/data-access"
 	"gowork/app/security"
 	"gowork/app/utils"
+
 	"gowork/routes"
+	"gowork/routes/auth"
+	"gowork/routes/user"
+
 	"log"
 	"os"
 	"path"
@@ -55,7 +59,7 @@ func main() {
 
 	jwtHandler := jwtmiddleware.New(jwtmiddleware.Config{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-			return []byte(routes.MySigningKey), nil
+			return []byte(auth.MySigningKey), nil
 		},
 		// When set, the middleware verifies that tokens are signed with the specific signing algorithm
 		// If the signing method is not constant the ValidationKeyGetter callback can be used to implement additional checks
@@ -70,20 +74,20 @@ func main() {
 	})
 	var apiRoutes = app.Party("/api")
 	apiRoutes.Use(func(ctx iris.Context) {
-		routes.VerifyToken(ctx, jwtHandler)
+		auth.VerifyToken(ctx, jwtHandler)
 	})
 	apiRoutes.Get("/", func(ctx iris.Context) {
 		log.Print(ctx.GetHeader(utils.ApiVersion))
-		// ctx.HTML("<h1>Welcome</h1>")
+
 		user := ctx.Values().Get("jwt").(*jwt.Token)
 		log.Println(user.Claims)
 		ctx.JSON(user)
 	})
-	apiRoutes.Get("/refreshToken", routes.RefreshToken)
+	apiRoutes.Get("/refreshToken", auth.RefreshToken)
 
 	var authRoutes = app.Party("/auth")
-	authRoutes.Post("/login", routes.Login)
-	authRoutes.Post("/register", routes.Register)
+	authRoutes.Post("/login", user.Login)
+	authRoutes.Post("/register", user.Register)
 
 	/* Official mongodb client.
 

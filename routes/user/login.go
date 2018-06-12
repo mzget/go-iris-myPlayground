@@ -1,4 +1,4 @@
-package routes
+package user
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -9,20 +9,11 @@ import (
 	"gowork/app/data-access"
 	"gowork/app/utils"
 
+	"gowork/routes/auth"
+
 	"log"
 	"time"
 )
-
-// MySigningKey key for jwt secret.
-const MySigningKey string = "MySecret1234"
-
-// MyCustomClaims for claim jwt payload.
-type MyCustomClaims struct {
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
-	ID       string `json:"id,omitempty"`
-	jwt.StandardClaims
-}
 
 // Login with username, password ...
 func Login(ctx iris.Context) {
@@ -49,7 +40,7 @@ func Login(ctx iris.Context) {
 
 	// Create the Claims
 	expireToken := time.Now().Add(time.Hour * 24).Unix()
-	claims := MyCustomClaims{
+	claims := auth.MyCustomClaims{
 		user.Email,
 		user.Password,
 		user.ID.String(),
@@ -60,7 +51,7 @@ func Login(ctx iris.Context) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString([]byte(MySigningKey))
+	ss, err := token.SignedString([]byte(auth.MySigningKey))
 	if err != nil {
 		log.Panic(err)
 	}

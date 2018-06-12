@@ -1,4 +1,4 @@
-package routes
+package user
 
 import (
 	// "encoding/json"
@@ -43,20 +43,16 @@ func Register(ctx iris.Context) {
 	}
 	err := user.Validate()
 	if err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.JSON(err)
-
+		utils.ResponseFailure(ctx, iris.StatusBadRequest, "", err)
 		return
 	}
 
 	var session = database.GetMgoSession()
 	coll := session.DB(config.DbName).C(config.UserCollection)
 	if err := coll.Insert(user); err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.JSON(err)
-
+		utils.ResponseFailure(ctx, iris.StatusBadRequest, "", err)
 		return
 	}
 
-	ctx.JSON(iris.Map{"data": map[string]bool{"success": true}})
+	utils.ResponseSuccess(ctx, map[string]bool{"success": true})
 }
