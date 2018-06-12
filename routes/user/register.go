@@ -7,6 +7,9 @@ import (
 	// "time"
 	"gowork/app/data-access"
 	"gowork/app/utils"
+
+	"github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 )
 
 // User model.
@@ -14,6 +17,15 @@ type User struct {
 	Name     string
 	Password string
 	Email    string
+}
+
+func (a User) Validate() error {
+	return validation.ValidateStruct(&a,
+		// Street cannot be empty, and the length must between 5 and 50
+		validation.Field(&a.Email, validation.Required, is.Email),
+		// City cannot be empty, and the length must between 5 and 50
+		validation.Field(&a.Password, validation.Required, validation.Length(8, 32)),
+	)
 }
 
 // Register user.
@@ -25,6 +37,13 @@ func Register(ctx iris.Context) {
 	var user = User{
 		Email:    email,
 		Password: password,
+	}
+	err := user.Validate()
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(err)
+
+		return
 	}
 
 	var session = database.GetMgoSession()

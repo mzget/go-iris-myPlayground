@@ -124,6 +124,9 @@ func main() {
 	// var sb strings.Builder
 	// sb.WriteString(":")
 	// sb.WriteString(configuration.Port)
+	app.Configure(iris.WithConfiguration(iris.Configuration{
+		DisableAutoFireStatusCode: true,
+	}))
 	app.Run(iris.Addr(":"+configuration.Port, configureHost), iris.WithoutServerError(iris.ErrServerClosed))
 }
 
