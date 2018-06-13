@@ -9,8 +9,6 @@ import (
 	"gowork/app/data-access"
 	"gowork/app/utils"
 
-	"gowork/routes/auth"
-
 	"gowork/models"
 
 	"log"
@@ -42,7 +40,7 @@ func Login(ctx iris.Context) {
 
 	// Create the Claims
 	expireToken := time.Now().Add(time.Hour * 24).Unix()
-	claims := auth.MyCustomClaims{
+	claims := utils.MyCustomClaims{
 		user.Email,
 		user.Password,
 		user.ID.Hex(),
@@ -53,7 +51,7 @@ func Login(ctx iris.Context) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString([]byte(auth.MySigningKey))
+	ss, err := token.SignedString([]byte(utils.MySigningKey))
 	if err != nil {
 		log.Panic(err)
 	}

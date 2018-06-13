@@ -5,14 +5,22 @@ import (
 
 	"github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
+
+	"time"
 )
 
 // User model.
 type User struct {
-	ID       bson.ObjectId `bson:"_id,omitempty"`
-	Name     string
-	Password string
-	Email    string
+	ID           bson.ObjectId `bson:"_id,omitempty"`
+	Name         string
+	Firstname    string
+	Lastname     string
+	Gender       string
+	Birthdate    string
+	Password     string
+	Email        string
+	CreateAt     time.Time
+	LastModified time.Time
 }
 
 func (a User) Validate() error {

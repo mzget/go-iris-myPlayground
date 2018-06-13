@@ -1,6 +1,7 @@
 package user
 
 import (
+	"time"
 	// "encoding/json"
 	"github.com/kataras/iris"
 
@@ -19,8 +20,10 @@ func Register(ctx iris.Context) {
 	config, _ := c.(utils.Configuration)
 
 	var user = models.User{
-		Email:    email,
-		Password: password,
+		Email:        email,
+		Password:     password,
+		CreateAt:     time.Now(),
+		LastModified: time.Now(),
 	}
 	err := user.Validate()
 	if err != nil {

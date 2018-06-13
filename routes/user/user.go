@@ -9,8 +9,6 @@ import (
 	"gowork/app/data-access"
 	"gowork/app/utils"
 
-	"gowork/routes/auth"
-
 	"gowork/models"
 
 	// "log"
@@ -22,7 +20,7 @@ import (
 func GetUser(ctx iris.Context) {
 	token := ctx.Values().Get("user")
 
-	myClaim := auth.MyCustomClaims{}
+	myClaim := utils.MyCustomClaims{}
 	bytes, _ := json.Marshal(token)
 	if err := json.Unmarshal(bytes, &myClaim); err != nil {
 		utils.ResponseFailure(ctx, iris.StatusBadRequest, nil, err.Error())
@@ -42,4 +40,24 @@ func GetUser(ctx iris.Context) {
 	}
 
 	utils.ResponseSuccess(ctx, user)
+}
+
+// PostUser use to update user data.
+func PostUser(ctx iris.Context) {
+
+	myClaim, err := utils.TokenParser(ctx)
+	if err != nil {
+		utils.ResponseFailure(ctx, iris.StatusBadRequest, nil, err.Error())
+	}
+
+	config := utils.ConfigParser(ctx)
+
+	user := models.User{}
+
+	session := database.GetMgoSession()
+	coll := session.DB(config.DbName).C(config.UserCollection)
+	if err := coll.Find(bson.M{"_id": bson.ObjectIdHex(myClaim.ID)}).Select(bson.M{"password": 0}).One(&user); err != nil {
+		utils.ResponseFailure(ctx, iris.StatusBadRequest, "NoContent", err)
+		return
+	}
 }

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"github.com/kataras/iris"
 
 	"log"
 	"os"
@@ -30,4 +31,12 @@ func GetConfig(confPath string) Configuration {
 	}
 
 	return configuration
+}
+
+// ConfigParser get config from context and return confiruration type.
+func ConfigParser(ctx iris.Context) Configuration {
+	c := ctx.Values().Get("config")
+	config, _ := c.(Configuration)
+
+	return config
 }

@@ -15,7 +15,7 @@ func VerifyToken(ctx iris.Context, jwtHandler *jwtmiddleware.Middleware) error {
 		utils.ResponseFailure(ctx, iris.StatusNonAuthoritativeInfo, "", tokenError.Error())
 		return tokenError
 	}
-	parseError := jwtHandler.ParseToken(ctx, token, &MyCustomClaims{})
+	parseError := jwtHandler.ParseToken(ctx, token, &utils.MyCustomClaims{})
 	if parseError != nil {
 		utils.ResponseFailure(ctx, iris.StatusNonAuthoritativeInfo, "", parseError.Error())
 		return parseError
