@@ -21,6 +21,8 @@ type User struct {
 	Email        string        `json:"email"`
 	CreateAt     time.Time     `json:"createAt" bson:"createAt,omitempty"`
 	LastModified time.Time     `json:"lastModified" bson:"lastModified,omitempty"`
+	Verified     bool          `json:"verified"`
+	VerifiedAt   time.Time     `json:"verifiedAt" bson:"verifiedAt,omitempty"`
 }
 
 func (a User) Validate() error {

@@ -1,6 +1,7 @@
 {
     "Port": "8080",
     "Env": "Staging",
+    "GeneratedLinkKey": "my-inmallgame",
     "DbDev": "mongodb://inmallgame:inmallgame1234@chitchat.animation-genius.com:27017/inmallgame",
     "DbPD": "mongodb://inmallgame:inmallgame1234@chitchat.animation-genius.com:27017/inmallgame",
     "DbName": "inmallgame",

@@ -13,8 +13,8 @@ import (
 	"gowork/models"
 )
 
-// Register user.
-func Register(ctx iris.Context) {
+// ResetPassword use for generate and send email to user email.
+func ResetPassword(ctx iris.Context) {
 	email, password := ctx.PostValue("email"), ctx.PostValue("password")
 	c := ctx.Values().Get("config")
 	config, _ := c.(utils.Configuration)
@@ -50,7 +50,5 @@ func Register(ctx iris.Context) {
 		return
 	}
 
-	utils.ResponseSuccess(ctx, iris.Map{
-		"success": true,
-		"message": "Verification email will send to you as " + user.Email})
+	utils.ResponseSuccess(ctx, map[string]bool{"success": true})
 }
