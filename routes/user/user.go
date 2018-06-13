@@ -70,7 +70,7 @@ func PostUser(ctx iris.Context) {
 	coll := session.DB(config.DbName).C(config.UserCollection)
 
 	colQuerier := bson.M{"_id": bson.ObjectIdHex(myClaim.ID)}
-	change := bson.M{"$set": m}
+	change := bson.M{"$set": m, "$currentDate": bson.M{"lastModified": true}}
 	if err = coll.Update(colQuerier, change); err != nil {
 		utils.ResponseFailure(ctx, iris.StatusBadRequest, nil, err.Error())
 		return

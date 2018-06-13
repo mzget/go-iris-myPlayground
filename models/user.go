@@ -19,8 +19,8 @@ type User struct {
 	Birthdate    string        `json:"birthdate"`
 	Password     string        `json:"password"`
 	Email        string        `json:"email"`
-	CreateAt     time.Time     `json:"createAt"`
-	LastModified time.Time     `json:"lastModified"`
+	CreateAt     time.Time     `json:"createAt" bson:"createAt,omitempty"`
+	LastModified time.Time     `json:"lastModified" bson:"lastModified,omitempty"`
 }
 
 func (a User) Validate() error {

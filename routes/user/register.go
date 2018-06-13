@@ -20,10 +20,9 @@ func Register(ctx iris.Context) {
 	config, _ := c.(utils.Configuration)
 
 	var user = models.User{
-		Email:        email,
-		Password:     password,
-		CreateAt:     time.Now(),
-		LastModified: time.Now(),
+		Email:    email,
+		Password: password,
+		CreateAt: time.Now(),
 	}
 	err := user.Validate()
 	if err != nil {
