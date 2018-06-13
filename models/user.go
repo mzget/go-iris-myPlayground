@@ -11,16 +11,16 @@ import (
 
 // User model.
 type User struct {
-	ID           bson.ObjectId `bson:"_id,omitempty"`
-	Name         string
-	Firstname    string
-	Lastname     string
-	Gender       string
-	Birthdate    string
-	Password     string
-	Email        string
-	CreateAt     time.Time
-	LastModified time.Time
+	ID           bson.ObjectId `json:"id" bson:"_id,omitempty" `
+	Name         string        `json:"name"`
+	Firstname    string        `json:"firstname"`
+	Lastname     string        `json:"lastname"`
+	Gender       string        `json:"gender"`
+	Birthdate    string        `json:"birthdate"`
+	Password     string        `json:"password"`
+	Email        string        `json:"email"`
+	CreateAt     time.Time     `json:"createAt"`
+	LastModified time.Time     `json:"lastModified"`
 }
 
 func (a User) Validate() error {

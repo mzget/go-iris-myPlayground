@@ -74,8 +74,6 @@ func main() {
 	})
 	var apiRoutes = app.Party("/api")
 	apiRoutes.Use(func(ctx iris.Context) {
-		log.Print(ctx.GetHeader(utils.ApiVersion))
-
 		err := auth.VerifyToken(ctx, jwtHandler)
 		if err == nil {
 			user := ctx.Values().Get("jwt").(*jwt.Token)
@@ -85,6 +83,7 @@ func main() {
 	})
 	apiRoutes.Get("/refreshToken", auth.RefreshToken)
 	apiRoutes.Get("/user", user.GetUser)
+	apiRoutes.Post("/user", user.PostUser)
 
 	var authRoutes = app.Party("/auth")
 	authRoutes.Post("/login", user.Login)
