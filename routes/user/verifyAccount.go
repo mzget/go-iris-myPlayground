@@ -47,6 +47,30 @@ func VerifyAccount(ctx iris.Context) {
 }
 
 // ResendActivationEmail use for send email to user again and again.
-func ResendActivationEmail() {
+func ResendActivationEmail(ctx iris.Context) {
+	email := ctx.PostValue("email")
+	if email == "" {
+		utils.ResponseFailure(ctx, iris.StatusBadRequest, nil, "Missing email field")
+		return
+	}
 
+	user := models.User{}
+
+	config := utils.ConfigParser(ctx)
+	session := database.GetMgoSession()
+	coll := session.DB(config.DbName).C(config.UserCollection)
+	filter := bson.M{"email": email}
+	if err := coll.Find(filter).One(&user); err != nil {
+		utils.ResponseFailure(ctx, iris.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	// encrypt value to base64
+	cryptoText := controller.Encrypt(config.GeneratedLinkKey, user.Email)
+
+	utils.ResponseSuccess(ctx, iris.Map{
+		"success": true,
+		"message": "Verification email will send to you as " + user.Email,
+		"secret":  cryptoText,
+	})
 }

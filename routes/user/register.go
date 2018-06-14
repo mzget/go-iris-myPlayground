@@ -50,7 +50,8 @@ func Register(ctx iris.Context) {
 		return
 	}
 
-	cryptoText := autoSendEmail(ctx, user.Email)
+	// encrypt value to base64
+	cryptoText := controller.Encrypt(config.GeneratedLinkKey, email)
 
 	fmt.Println("cryptoText, ", cryptoText)
 	utils.ResponseSuccess(ctx, iris.Map{
@@ -58,12 +59,4 @@ func Register(ctx iris.Context) {
 		"message": "Verification email will send to you as " + user.Email,
 		"secret":  cryptoText,
 	})
-}
-
-func autoSendEmail(ctx iris.Context, email string) string {
-	config := utils.ConfigParser(ctx)
-	// encrypt value to base64
-	cryptoText := controller.Encrypt(config.GeneratedLinkKey, email)
-
-	return cryptoText
 }

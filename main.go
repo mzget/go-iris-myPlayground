@@ -89,6 +89,7 @@ func main() {
 	authRoutes.Post("/login", user.Login)
 	authRoutes.Post("/register", user.Register)
 	authRoutes.Post("/verifyAccount", user.VerifyAccount)
+	authRoutes.Post("/resendEmail", user.ResendActivationEmail)
 
 	/* Official mongodb client.
 
