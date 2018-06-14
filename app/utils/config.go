@@ -10,12 +10,15 @@ import (
 
 // Configuration structure.
 type Configuration struct {
-	Port             string
-	Env              string
-	DbDev            string
-	DbPD             string
-	DbName           string
-	UserCollection   string
+	Port           string
+	Env            string
+	DbDev          string
+	DbPD           string
+	DbName         string
+	UserCollection string
+	/*
+	*  Must be 16 bytes len
+	 */
 	GeneratedLinkKey string
 }
 

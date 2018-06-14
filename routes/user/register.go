@@ -61,10 +61,8 @@ func Register(ctx iris.Context) {
 
 func autoSendEmail(ctx iris.Context, email string) {
 	config := utils.ConfigParser(ctx)
-
-	key := []byte(config.GeneratedLinkKey)
 	// encrypt value to base64
-	cryptoText := controller.Encrypt(key, email)
+	cryptoText := controller.Encrypt(config.GeneratedLinkKey, email)
 
 	fmt.Println(cryptoText)
 }

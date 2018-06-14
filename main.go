@@ -88,6 +88,7 @@ func main() {
 	var authRoutes = app.Party("/auth")
 	authRoutes.Post("/login", user.Login)
 	authRoutes.Post("/register", user.Register)
+	authRoutes.Post("/verifyAccount", user.VerifyAccount)
 
 	/* Official mongodb client.
 

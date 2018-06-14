@@ -7,6 +7,7 @@ import (
 
 	"github.com/globalsign/mgo/bson"
 	// "time"
+	"fmt"
 	"gowork/app/controller"
 	"gowork/app/data-access"
 	"gowork/app/models"
@@ -18,8 +19,13 @@ func VerifyAccount(ctx iris.Context) {
 	secret := ctx.PostValue("secret")
 	config := utils.ConfigParser(ctx)
 
-	key := []byte(config.GeneratedLinkKey)
-	email := controller.Decrypt(key, secret)
+	if secret == "" {
+		fmt.Println("Missing secret data")
+		utils.ResponseFailure(ctx, iris.StatusBadRequest, nil, "Missing secret data")
+		return
+	}
+
+	email := controller.Decrypt(config.GeneratedLinkKey, secret)
 
 	var session = database.GetMgoSession()
 	coll := session.DB(config.DbName).C(config.UserCollection)
