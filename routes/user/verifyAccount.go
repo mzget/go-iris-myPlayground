@@ -14,7 +14,7 @@ import (
 	"gowork/app/utils"
 )
 
-// VerifyAccount use for user verification process.
+// VerifyAccount use for email activation process.
 func VerifyAccount(ctx iris.Context) {
 	secret := ctx.PostValue("secret")
 	config := utils.ConfigParser(ctx)
@@ -44,4 +44,9 @@ func VerifyAccount(ctx iris.Context) {
 	}
 
 	utils.ResponseSuccess(ctx, user)
+}
+
+// ResendActivationEmail use for send email to user again and again.
+func ResendActivationEmail() {
+
 }

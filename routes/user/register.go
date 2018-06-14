@@ -36,12 +36,10 @@ func Register(ctx iris.Context) {
 	coll := session.DB(config.DbName).C(config.UserCollection)
 	// Find email already register first.
 	num, notFound := coll.Find(bson.M{"email": user.Email}).Count()
-
 	if notFound != nil {
 		utils.ResponseFailure(ctx, iris.StatusBadRequest, nil, notFound)
 		return
 	}
-
 	if num > 0 {
 		utils.ResponseFailure(ctx, iris.StatusBadRequest, "Email already used.", nil)
 		return
@@ -52,17 +50,20 @@ func Register(ctx iris.Context) {
 		return
 	}
 
+	cryptoText := autoSendEmail(ctx, user.Email)
+
+	fmt.Println("cryptoText, ", cryptoText)
 	utils.ResponseSuccess(ctx, iris.Map{
 		"success": true,
-		"message": "Verification email will send to you as " + user.Email})
-
-	autoSendEmail(ctx, user.Email)
+		"message": "Verification email will send to you as " + user.Email,
+		"secret":  cryptoText,
+	})
 }
 
-func autoSendEmail(ctx iris.Context, email string) {
+func autoSendEmail(ctx iris.Context, email string) string {
 	config := utils.ConfigParser(ctx)
 	// encrypt value to base64
 	cryptoText := controller.Encrypt(config.GeneratedLinkKey, email)
 
-	fmt.Println(cryptoText)
+	return cryptoText
 }
