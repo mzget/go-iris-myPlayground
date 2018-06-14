@@ -9,7 +9,7 @@ import (
 )
 
 // VerifyToken use to serve verify middleware.
-func VerifyToken(ctx iris.Context, jwtHandler *jwtmiddleware.Middleware) error {
+func VerifyToken(ctx iris.Context, jwtHandler *middleware.Middleware) error {
 	token, tokenError := jwtHandler.ValidationToken(ctx)
 	if tokenError != nil {
 		utils.ResponseFailure(ctx, iris.StatusNonAuthoritativeInfo, "", tokenError.Error())

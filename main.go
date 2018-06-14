@@ -5,6 +5,7 @@ import (
 	"github.com/betacraft/yaag/yaag"
 	"github.com/dgrijalva/jwt-go"
 
+	"github.com/didip/tollbooth"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/core/host"
 	"github.com/kataras/iris/middleware/logger"
@@ -33,7 +34,6 @@ func main() {
 	// and log the requests to the terminal.
 	app.Use(recover.New())
 	app.Use(logger.New())
-
 	// first parameter is the request path
 	// second is the system directory
 	app.StaticWeb("/static", "./assets")
@@ -57,7 +57,7 @@ func main() {
 	session := database.MgoConnect(configuration)
 	defer session.Close()
 
-	jwtHandler := jwtmiddleware.New(jwtmiddleware.Config{
+	jwtHandler := middleware.New(middleware.Config{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 			return []byte(utils.MySigningKey), nil
 		},
@@ -68,7 +68,14 @@ func main() {
 		Expiration:    true,
 	})
 
+	limiter := tollbooth.NewLimiter(1, nil)
 	app.Use(func(ctx iris.Context) {
+		if httpError := middleware.LimitHandler(ctx, limiter); httpError != nil {
+			utils.ResponseFailure(ctx, httpError.StatusCode, nil, httpError.Message)
+			ctx.StopExecution()
+			return
+		}
+
 		ctx.Values().Set("config", configuration)
 		ctx.Next()
 	})
