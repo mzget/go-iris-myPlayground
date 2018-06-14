@@ -9,8 +9,8 @@ import (
 	// "log"
 	// "time"
 	"gowork/app/data-access"
+	"gowork/app/models"
 	"gowork/app/utils"
-	"gowork/models"
 )
 
 // ResetPassword use for generate and send email to user email.

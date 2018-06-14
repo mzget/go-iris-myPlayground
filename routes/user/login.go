@@ -7,9 +7,8 @@ import (
 	"github.com/globalsign/mgo/bson"
 
 	"gowork/app/data-access"
+	"gowork/app/models"
 	"gowork/app/utils"
-
-	"gowork/models"
 
 	"log"
 	"time"

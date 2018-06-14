@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"time"
 	// "encoding/json"
 	"github.com/kataras/iris"
@@ -8,9 +9,10 @@ import (
 	"github.com/globalsign/mgo/bson"
 	// "log"
 	// "time"
+	"gowork/app/controller"
 	"gowork/app/data-access"
+	"gowork/app/models"
 	"gowork/app/utils"
-	"gowork/models"
 )
 
 // Register user.
@@ -53,4 +55,16 @@ func Register(ctx iris.Context) {
 	utils.ResponseSuccess(ctx, iris.Map{
 		"success": true,
 		"message": "Verification email will send to you as " + user.Email})
+
+	autoSendEmail(ctx, user.Email)
+}
+
+func autoSendEmail(ctx iris.Context, email string) {
+	config := utils.ConfigParser(ctx)
+
+	key := []byte(config.GeneratedLinkKey)
+	// encrypt value to base64
+	cryptoText := controller.Encrypt(key, email)
+
+	fmt.Println(cryptoText)
 }
