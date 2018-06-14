@@ -11,6 +11,9 @@ import (
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
 
+	prometheusMiddleware "github.com/iris-contrib/middleware/prometheus"
+	"github.com/prometheus/client_golang/prometheus"
+
 	"gowork/app/data-access"
 	"gowork/app/security"
 	"gowork/app/utils"
@@ -68,6 +71,9 @@ func main() {
 		Expiration:    true,
 	})
 
+	prom := prometheusMiddleware.New("serviceName", 300, 1200, 5000)
+	app.Use(prom.ServeHTTP)
+
 	limiter := tollbooth.NewLimiter(1, nil)
 	app.Use(func(ctx iris.Context) {
 		if httpError := middleware.LimitHandler(ctx, limiter); httpError != nil {
@@ -123,6 +129,7 @@ func main() {
 		})
 	*/
 	app.Get("/seasons", routes.Seasons)
+	app.Get("/metrics", iris.FromStd(prometheus.Handler()))
 
 	// registers a custom handler for 404 not found http (error) status code,
 	// fires when route not found or manually by ctx.StatusCode(iris.StatusNotFound).
