@@ -1,6 +1,6 @@
 
 #build stage
-FROM golang:1.10.3-alpine
+FROM golang:1.10.3
 WORKDIR /go/src/app
 # Copy the local package files to the container's workspace.
 ADD . /go/src/gowork

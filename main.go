@@ -11,8 +11,12 @@ import (
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
 
-	prometheusMiddleware "github.com/iris-contrib/middleware/prometheus"
-	"github.com/prometheus/client_golang/prometheus"
+	// prometheusMiddleware "github.com/iris-contrib/middleware/prometheus"
+	// "github.com/prometheus/client_golang/prometheus"
+
+	opentracing "github.com/opentracing/opentracing-go"
+	jaeger "github.com/uber/jaeger-client-go"
+	jaegerConfig "github.com/uber/jaeger-client-go/config"
 
 	"gowork/app/data-access"
 	"gowork/app/security"
@@ -22,12 +26,32 @@ import (
 	"gowork/routes/auth"
 	"gowork/routes/user"
 
+	"fmt"
+	"io"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
 	// "strings"
 )
+
+// initJaeger returns an instance of Jaeger Tracer that samples 100% of traces and logs all spans to stdout.
+func initJaeger(service string) (opentracing.Tracer, io.Closer) {
+	cfg := &jaegerConfig.Configuration{
+		Sampler: &jaegerConfig.SamplerConfig{
+			Type:  "const",
+			Param: 1,
+		},
+		Reporter: &jaegerConfig.ReporterConfig{
+			LogSpans: true,
+		},
+	}
+	tracer, closer, err := cfg.New(service, jaegerConfig.Logger(jaeger.StdLogger))
+	if err != nil {
+		panic(fmt.Sprintf("ERROR: cannot init Jaeger: %v\n", err))
+	}
+	return tracer, closer
+}
 
 func main() {
 	app := iris.New()
@@ -71,11 +95,17 @@ func main() {
 		Expiration:    true,
 	})
 
-	prom := prometheusMiddleware.New("serviceName", 300, 1200, 5000)
-	app.Use(prom.ServeHTTP)
+	// prom := prometheusMiddleware.New("serviceName", 300, 1200, 5000)
+	// app.Use(prom.ServeHTTP)
 
 	limiter := tollbooth.NewLimiter(1, nil)
 	app.Use(func(ctx iris.Context) {
+		// tracer := opentracing.GlobalTracer()
+		tracer, closer := initJaeger("hello-world")
+		defer closer.Close()
+
+		span := tracer.StartSpan("limit-and-setconfig")
+
 		if httpError := middleware.LimitHandler(ctx, limiter); httpError != nil {
 			utils.ResponseFailure(ctx, httpError.StatusCode, nil, httpError.Message)
 			ctx.StopExecution()
@@ -84,6 +114,8 @@ func main() {
 
 		ctx.Values().Set("config", configuration)
 		ctx.Next()
+
+		span.Finish()
 	})
 	var apiRoutes = app.Party("/api")
 	apiRoutes.Use(func(ctx iris.Context) {
@@ -129,7 +161,7 @@ func main() {
 		})
 	*/
 	app.Get("/seasons", routes.Seasons)
-	app.Get("/metrics", iris.FromStd(prometheus.Handler()))
+	// app.Get("/metrics", iris.FromStd(prometheus.Handler()))
 
 	// registers a custom handler for 404 not found http (error) status code,
 	// fires when route not found or manually by ctx.StatusCode(iris.StatusNotFound).
