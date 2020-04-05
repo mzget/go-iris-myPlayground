@@ -3,15 +3,17 @@ package database
 import (
 	"gowork/app/utils"
 
-	"github.com/globalsign/mgo"
+	// "fmt"
 
-	"log"
+	"github.com/globalsign/mgo"
 )
 
 var mgoSession *mgo.Session
 
 // MgoConnect use for init mongodb connection.
 func MgoConnect(configuration utils.Configuration) *mgo.Session {
+	// fmt.Println(configuration)
+
 	// Database connection
 	var connection = ""
 	if configuration.Env == "Staging" {
@@ -21,7 +23,7 @@ func MgoConnect(configuration utils.Configuration) *mgo.Session {
 	}
 	session, err := mgo.Dial(connection)
 	if nil != err {
-		log.Panic(err.Error())
+		panic(err.Error())
 	}
 	session.SetMode(mgo.Monotonic, true)
 

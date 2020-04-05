@@ -10,7 +10,7 @@ func ResponseSuccess(ctx iris.Context, data interface{}) {
 }
 
 // ResponseFailure when everything so sad.
-func ResponseFailure(ctx iris.Context, statusCode int, data interface{}, err interface{}) {
+func ResponseFailure(ctx iris.Context, statusCode int, message interface{}, err interface{}) {
 	ctx.StatusCode(statusCode)
-	ctx.JSON(iris.Map{"message": data, "error": err})
+	ctx.JSON(iris.Map{"message": message, "error": err})
 }

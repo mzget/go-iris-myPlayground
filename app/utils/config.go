@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/kataras/iris"
 
-	"log"
+	"fmt"
 	"os"
 )
 
@@ -26,12 +26,13 @@ type Configuration struct {
 func GetConfig(confPath string) Configuration {
 	file, _ := os.Open(confPath)
 	defer file.Close()
+	fmt.Println(confPath)
 
 	decoder := json.NewDecoder(file)
 	configuration := Configuration{}
 	err := decoder.Decode(&configuration)
 	if err != nil {
-		log.Panic(err)
+		panic(err)
 	}
 
 	return configuration
